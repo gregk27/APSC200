@@ -1,5 +1,6 @@
-import apsc200.team13.TestClass;
+build
 
+import apsc200.team13.*;
 tc = TestClass;
 
 tc.test();
