@@ -8,6 +8,7 @@ cap = cv2.VideoCapture(0)
 
 print(cap.isOpened())
 
+alpha = 1.5
 blocksize = 5
 blurRad = 5
 done = False
@@ -27,6 +28,9 @@ def onThresh(val):
     global blocksize
     blocksize = val + (val % 2-1)
 
+def onAlpha(val):
+    global alpha
+    alpha = val/100
 
 def onBlur(val):
     global blurRad
@@ -69,9 +73,11 @@ def onMaxArea(val):
 
 
 onThresh(228)
-onBlur(3)
-onRatioUpper(18)
-onRatioLower(13)
+onBlur(2)
+onC1(154)
+onC2(341)
+onRatioUpper(17)
+onRatioLower(14)
 onTop(344)
 onBottom(433)
 onLeft(420)
@@ -85,11 +91,12 @@ def doOnce():
         return
     done = True
     cv2.createTrackbar('threshold', 'thresh', 228, 500, onThresh)
-    cv2.createTrackbar('blur', 'blurred', 3, 50, onBlur)
-    cv2.createTrackbar('C1', 'canny', 10, 500, onC1)
-    cv2.createTrackbar('C2', 'canny', 10, 500, onC2)
-    cv2.createTrackbar('ratioUpper', 'results', 18, 100, onRatioUpper)
-    cv2.createTrackbar('ratioLower', 'results', 13, 100, onRatioLower)
+    cv2.createTrackbar('alpha', 'contrast', 150, 1000, onAlpha)
+    cv2.createTrackbar('blur', 'blurred', 2, 50, onBlur)
+    cv2.createTrackbar('C1', 'canny', 154, 500, onC1)
+    cv2.createTrackbar('C2', 'canny', 341, 500, onC2)
+    cv2.createTrackbar('ratioUpper', 'results', 17, 100, onRatioUpper)
+    cv2.createTrackbar('ratioLower', 'results', 14, 100, onRatioLower)
     cv2.createTrackbar('T', 'results', 344, 480, onTop)
     cv2.createTrackbar('B', 'results', 433, 480, onBottom)
     cv2.createTrackbar('L', 'results', 420, 640, onLeft)
@@ -103,15 +110,20 @@ while(True):
     ret, frame = cap.read()
     raw = frame
 
-    img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    cv2.imshow('image', img)
+    img = frame
+    # img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # cv2.imshow('image', img)
 
-    img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                cv2.THRESH_BINARY, blocksize, 2)
-    cv2.imshow('thresh', img)
+    # img = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+    #                             cv2.THRESH_BINARY, blocksize, 2)
+    # cv2.imshow('thresh', img)
 
-    img = cv2.medianBlur(img, blurRad)
-    cv2.imshow('blurred', img)
+    print(alpha)
+    img = cv2.convertScaleAbs(img, alpha=alpha)
+    cv2.imshow('contrast', img)
+
+    # img = cv2.medianBlur(img, blurRad)
+    # cv2.imshow('blurred', img)
 
     img = cv2.Canny(img, C1, C2, -1, 3, True)
     cv2.imshow('canny', img)
