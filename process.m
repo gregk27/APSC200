@@ -33,6 +33,8 @@ function [] = process(scenario, objects, ptCloud, world, vehicle)
         model = pcfitcuboid(cloud, idx);
         if prod(model.Dimensions) > 5
             %plot(model)
+            axes(world);
+            plot(cuboid2Inertial(model, vehicle));
             % Narrow down to vehicles in specific area
             if model.Center(1) > 0 && model.Center(2) < -0.5 && model.Center(2) > -2
                 % If it's closer than closest, use it
@@ -47,6 +49,7 @@ function [] = process(scenario, objects, ptCloud, world, vehicle)
     end
     %plot3(closest.Center(1), closest.Center(2), closest.Center(3));
     if ~isempty(closest)
+        figure(fig)
         plot(closest)
     end
         
