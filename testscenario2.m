@@ -22,9 +22,6 @@ scenario.StopTime = 20;
 objectArray = [];
 delta = 8;
 
-f1 = figure;
-f2 = figure;
-
 allData = struct('Time', {}, 'ActorPoses', {}, 'ObjectDetections', {}, 'LaneDetections', {}, 'PointClouds', {});
 running = true;
 while running
@@ -83,39 +80,7 @@ while running
     
         
     if any(isValidTime) || any(isValidLaneTime) || any(isValidPointCloudTime)
-       objects = objectDetections;
-       objectsStruct = [objects{:}];
-       
-       if ~isempty(objects)
-               allPosInertial = vehicle2Inertial(objects, egoVehicle);
-               disp('Class ids: %i\n');
-               disp([objectsStruct.ObjectClassID]);
-
-       end
-   
-       
-       plot3(allPosInertial(1,:), allPosInertial(2,:), allPosInertial(3,:), 'b. ', 'Parent', hTopViewAxes);
-       
-       json = jsonencode(objectsStruct)
-       inertial = jsonencode(allPosInertial)
-       
-       figure(f1);
-       pcshow(ptClouds)
-       figure(f2);
-       [model1,inlierIndices,outlierIndices] = pcfitplane(ptCloud,1,[0,0,1],0.02);
-        cloud = select(ptCloud,inlierIndices);
-       [labels, numClusters] = pcsegdist(cloud, 0.5);
-       pcshow(cloud.Location, labels);
-       title(sprintf('Point Cloud Clusters @ %i',scenario.SimulationTime));
-       
-       for i = 1:numClusters
-           idx = find(labels == i);
-           model = pcfitcuboid(cloud, idx);
-           plot(model)
-       end
-       
-       message = sprintf('Number of objects sampled in one time step: %f\n', length(objects));
-       textField.String = message;
+        process(scenario, objectDetections, ptCloud)
     end
     
     
