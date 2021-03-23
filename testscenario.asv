@@ -58,18 +58,12 @@ while running
        objects = objectDetections;
        objectsStruct = [objects{:}];
        
-       allPosInertial = vehicle2Inertial(objects, egoVehicle);
+       allPosInertial = vehicle2Intertial(objects, egoVehicle);
        
        disp('Class ids: %i\n');
        disp([objectsStruct.ObjectClassID]);
        
-       plot3(allPosInertial(1,:), allPosInertial(2,:), allPosInertial(3,:), 'b. ', 'Parent', hTopViewAxes);
-       
-       json = jsonencode(objectsStruct)
-       inertial = jsonencode(allPosInertial)
-       
-       message = sprintf('Number of objects sampled in one time step: %i\n', length(objects));
-       textField.String = message;
+       plot3(allPosInertial(1,:), allPosIner
     end
     
     % Advance the scenario one time step and exit the loop if the scenario is complete
