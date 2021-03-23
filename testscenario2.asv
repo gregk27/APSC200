@@ -86,13 +86,15 @@ while running
        objects = objectDetections;
        objectsStruct = [objects{:}];
        
-       if ~isempty(objects)
-               allPosInertial = vehicle2Inertial(objects, egoVehicle);
-               disp('Class ids: %i\n');
-               disp([objectsStruct.ObjectClassID]);
-
+       disp(objectsStruct);
+       if ~isemtpy(A)
+           allPosInertial = vehicle2Inertial(objects, egoVehicle);
+       catch E
+           disp(E)
        end
    
+       disp('Class ids: %i\n');
+       disp([objectsStruct.ObjectClassID]);
        
        plot3(allPosInertial(1,:), allPosInertial(2,:), allPosInertial(3,:), 'b. ', 'Parent', hTopViewAxes);
        
