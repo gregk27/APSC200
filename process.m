@@ -1,4 +1,4 @@
-function [] = process(scenario, objects, ptCloud)
+function [] = process(scenario, objects, ptCloud, world, vehicle)
     persistent fig
     if isempty(fig)
         fig = figure;
@@ -6,12 +6,12 @@ function [] = process(scenario, objects, ptCloud)
 
     % objectsStruct = [objects{:}];
     
-    % if ~isempty(objects)
-    %         allPosInertial = vehicle2Inertial(objects, egoVehicle);
-    %         disp('Class ids: %i\n');
-    %         disp([objectsStruct.ObjectClassID]);
+     %if ~isempty(objects)
+     %        allPosInertial = vehicle2Inertial(objects, vehicle);
+     %        disp('Class ids: %i\n');
+     %        disp([objectsStruct.ObjectClassID]);
 
-    % end
+     %end
 
     % plot3(allPosInertial(1,:), allPosInertial(2,:), allPosInertial(3,:), 'b. ', 'Parent', hTopViewAxes);
     
@@ -24,17 +24,34 @@ function [] = process(scenario, objects, ptCloud)
     figure(fig);
     pcshow(cloud.Location, labels);
     title(sprintf('Point Cloud Clusters @ %i',scenario.SimulationTime));
-    
-    % Get and plot cuboids from point clouds
+     
+    closest = [];
+
+    % Get and plot cuboids5 from point clouds
     for i = 1:numClusters
         idx = find(labels == i);
         model = pcfitcuboid(cloud, idx);
-        plot(model)
+        if prod(model.Dimensions) > 5
+            %plot(model)
+            % Narrow down to vehicles in specific area
+            if model.Center(1) > 0 && model.Center(2) < -0.5 && model.Center(2) > -2
+                % If it's closer than closest, use it
+                if isempty(closest)
+                    closest = model;
+                elseif model.Center(1) < closest.Center(1)
+                    closest = model;
+                end
+            end
+            %plot(model.Center)
+        end
     end
-    
+    %plot3(closest.Center(1), closest.Center(2), closest.Center(3));
+    if ~isempty(closest)
+        plot(closest)
+    end
+        
     % Update message
     message = sprintf('Number of objects sampled in one time step: %f\n', length(objects));
     textField.String = message;
-
 end
 

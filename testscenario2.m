@@ -1,4 +1,6 @@
 function [allData, scenario, sensors] = testscenario()
+
+clear all;
 %testscenario - Returns sensor detections
 %    allData = testscenario returns sensor detections in a structure
 %    with time for an internally defined scenario and sensor suite.
@@ -80,7 +82,7 @@ while running
     
         
     if any(isValidTime) || any(isValidLaneTime) || any(isValidPointCloudTime)
-        process(scenario, objectDetections, ptCloud)
+        process(scenario, objectDetections, ptCloud, hTopViewAxes, egoVehicle)
     end
     
     
