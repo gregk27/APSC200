@@ -18,11 +18,6 @@ clear all;
 [sensors, numSensors] = createSensors(scenario);
 
 scenario.StopTime = 20;
-[textField, hTopViewAxes] = plotScenario(scenario, egoVehicle);
-
-% User defined variables
-objectArray = [];
-delta = 8;
 
 allData = struct('Time', {}, 'ActorPoses', {}, 'ObjectDetections', {}, 'LaneDetections', {}, 'PointClouds', {});
 running = true;
@@ -82,7 +77,7 @@ while running
     
         
     if any(isValidTime) || any(isValidLaneTime) || any(isValidPointCloudTime)
-        process(scenario, objectDetections, ptCloud, hTopViewAxes, egoVehicle)
+        process(scenario, objectDetections, ptCloud, egoVehicle)
     end
     
     

@@ -1,9 +1,15 @@
-function [] = process(scenario, objects, ptCloud, world, vehicle)
+function [] = process(scenario, objects, ptCloud, vehicle)
     persistent fig;
     persistent detected;
+    persistent textField;
+    persistent hTopViewAxes;
     if isempty(fig)
-        fig = figure;
+        fig = findall(0, 'Type', 'Figure', 'Tag', 'lidar');
+        if isempty(fig)
+            fig = figure('name', 'LIDAR Result', 'Tag', 'lidar');
+        end
         detected = [];
+        [textField, hTopViewAxes] = plotScenario(scenario, vehicle);
     end
 
     % objectsStruct = [objects{:}];
@@ -63,13 +69,13 @@ function [] = process(scenario, objects, ptCloud, world, vehicle)
         ws = cuboid2Inertial(closest, vehicle);
         if isempty(detected)
             detected = [ws.Center];
-            axes(world);
+            axes(hTopViewAxes);
             plot(ws);
         else
             rows = ismembertol(detected, ws.Center, 0.15, 'ByRows', true);
             if ~rows
                 detected = [detected; ws.Center];
-                axes(world);
+                axes(hTopViewAxes);
                 plot(ws);
             else
                 disp(detected);
@@ -81,7 +87,8 @@ function [] = process(scenario, objects, ptCloud, world, vehicle)
     end
         
     % Update message
-    message = sprintf('Number of objects sampled in one time step: %f\n', length(detected));
+    s = size(detected);
+    message = sprintf('Number of vehicles detected: %d\n', s(1));
     textField.String = message;
 end
 
