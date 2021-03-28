@@ -21,12 +21,12 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     
     closest = [];
 
-    [cuboids, cloud, fig] = lidarlib(ptCloud, scenario, vehicle, 'minSize', 5, 'minX', 0, 'maxY', 2, 'minY', 0.5, 'plot', 'cloud', 'callback', @onFilter);
+    [cuboids, cloud, fig] = LidarLib.process(ptCloud, scenario, vehicle, 'minSize', 5, 'minX', 0, 'maxY', 2, 'minY', 0.5, 'plot', 'cloud', 'callback', @onFilter);
     
     if ~isempty(closest)
         figure(fig);
         plot(closest);
-        ws = cuboid2Inertial(closest, vehicle);
+        ws = LidarLib.cuboid2Inertial(closest, vehicle);
         if isempty(detected)
             detected = [ws.Center];
             axes(hTopViewAxes);
