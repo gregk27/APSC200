@@ -11,6 +11,13 @@ classdef LidarLib
 %  - scenario: The scenario variable
 %  - vehicle: The ego vehicle
 %
+% PROCESS  Find cuboids in lidar point cloud
+%
+% Required Parameters 
+%  - ptCloud: Lidar point cloud output
+%  - scenario: The scenario variable
+%  - vehicle: The ego vehicle
+%
 % Optional parameters
 %  - minDist: Minimum distance from the ego vehicle, used to remove
 %      vehicle from results [default: 0.05]
@@ -18,8 +25,8 @@ classdef LidarLib
 %  - maxSize: Maximum size of cuboid [default: 999]
 %  - minX: Minumum x position (forward positive) [default: -999]
 %  - maxX: Maxuimum x position (forward positive) [default: 999]
-%  - minY: Minimum y position (right positive, opposite from plot) [default: -999]
-%  - maxY: Maximum y position (right positive, opposite from plot) [default: 999]
+%  - minY: Minimum y position (left positive) [default: -999]
+%  - maxY: Maximum y position (left positive) [default: 999]
 %  - inertial: Flag to indicate if cuboids should be in inertial space
 %      instead of vehicle space [default: false]
 %  - plot: Plotting mode [default: ''], options are:
@@ -29,6 +36,8 @@ classdef LidarLib
 %      -> 'filtered': Plot only cuboids meeting filter results
 %      -> 'selected': Plot only cuboids meeting callback (same as
 %            filtered if no callback)
+%  - roi: List representing the Region of Interest, in the format [xmin, xman, ymin, ymax, zmin, zmax]. 
+%      This filter will be applied before any others for performance. All coordinates same as plot [default: []]
 %  - callback: Callback function to be called when other parameters met, 
 %      needs signagure: function [res] = callback(model, inertial). [default: returns true]
 %      -> res is result, if true cuboid will be returned.
@@ -41,9 +50,11 @@ classdef LidarLib
 %  - fig: Figure used when plotting, empty if plot=''
 %
 % Example
-%   cuboids = process(ptCloud, scenario, egoVehicle, 'maxSize', 100, 'minX', 0, 'minY', 0, 'maxY', 5, 'plot', 'filtered')
+%   cuboids = PROCESS(ptCloud, scenario, egoVehicle, 'maxSize', 100, 'minX', 0, 'minY', 0, 'maxY', 5, 'plot', 'filtered')
 %     will return all cuboids under 100m², infront of vehicle and less
 %     than 5m to the left. Additionally, it will plot these cuboids
+%
+% See also: LIDARLIB.CUBOID2INERTIAL
 %
 %
 % CUBOID2INERTIAL  Converts cuboid from vehicle space to inertial space
@@ -74,8 +85,8 @@ classdef LidarLib
             %  - maxSize: Maximum size of cuboid [default: 999]
             %  - minX: Minumum x position (forward positive) [default: -999]
             %  - maxX: Maxuimum x position (forward positive) [default: 999]
-            %  - minY: Minimum y position (right positive, opposite from plot) [default: -999]
-            %  - maxY: Maximum y position (right positive, opposite from plot) [default: 999]
+            %  - minY: Minimum y position (left positive) [default: -999]
+            %  - maxY: Maximum y position (left positive) [default: 999]
             %  - inertial: Flag to indicate if cuboids should be in inertial space
             %      instead of vehicle space [default: false]
             %  - plot: Plotting mode [default: ''], options are:
@@ -85,6 +96,8 @@ classdef LidarLib
             %      -> 'filtered': Plot only cuboids meeting filter results
             %      -> 'selected': Plot only cuboids meeting callback (same as
             %            filtered if no callback)
+            %  - roi: List representing the Region of Interest, in the format [xmin, xman, ymin, ymax, zmin, zmax]. 
+            %      This filter will be applied before any others for performance. All coordinates same as plot [default: []]
             %  - callback: Callback function to be called when other parameters met, 
             %      needs signagure: function [res] = callback(model, inertial). [default: returns true]
             %      -> res is result, if true cuboid will be returned.
@@ -180,7 +193,7 @@ classdef LidarLib
                 end
                 if prod(model.Dimensions) > p.Results.minSize && prod(model.Dimensions) < p.Results.maxSize
                     % Narrow down to vehicles in specific area
-                    if model.Center(1) > p.Results.minX && model.Center(1) < p.Results.maxX && model.Center(2) > -p.Results.maxY && model.Center(2) < -p.Results.minY
+                    if model.Center(1) > p.Results.minX && model.Center(1) < p.Results.maxX && model.Center(2) < p.Results.maxY && model.Center(2) > p.Results.minY
                         if strcmp(p.Results.plot, 'filtered')
                             figure(fig);
                             plot(model);
