@@ -1,4 +1,4 @@
-function [cuboids, cloud] = lidarlib(ptCloud, scenario, vehicle, varargin)
+function [cuboids, cloud, fig] = lidarlib(ptCloud, scenario, vehicle, varargin)
     plotModes = {'cloud', 'all', 'filtered', 'selected'};
     
     p = inputParser;
@@ -38,10 +38,11 @@ function [cuboids, cloud] = lidarlib(ptCloud, scenario, vehicle, varargin)
         end
         figure(fig);
         
+
         % Draw point cloud
         pcshow(cloud.Location, labels);
         title(sprintf('Point Cloud Clusters @ %i',scenario.SimulationTime));
-        
+
         % Mark vehicle location
         plot(cuboidModel([1,0,1,1,1,0.5,0,0,0]));
     end

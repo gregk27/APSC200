@@ -1,13 +1,9 @@
 function [] = process(scenario, objects, ptCloud, vehicle)
-    persistent fig;
     persistent detected;
     persistent textField;
     persistent hTopViewAxes;
-    if isempty(fig)
-        fig = findall(0, 'Type', 'Figure', 'Tag', 'lidar');
-        if isempty(fig)
-            fig = figure('name', 'LIDAR Result', 'Tag', 'lidar');
-        end
+    global closest;
+    if isempty(detected)
         detected = [];
         [textField, hTopViewAxes] = plotScenario(scenario, vehicle);
     end
@@ -23,46 +19,10 @@ function [] = process(scenario, objects, ptCloud, vehicle)
 
     % plot3(allPosInertial(1,:), allPosInertial(2,:), allPosInertial(3,:), 'b. ', 'Parent', hTopViewAxes);
     
-    % Filter out road surface
-    [model1,inlierIndices,outlierIndices] = pcfitplane(ptCloud,1,[0,0,1],0.02);
-    cloud = select(ptCloud,inlierIndices);
-    
-    % Eliminate points on vehicle roof
-    magnitudes = sqrt((cloud.Location(:, 1)-1).^2+cloud.Location(:, 2).^2);
-    cloud = pointCloud(cloud.Location(magnitudes > 1, :));
-    
-    % Cluster to get cuboids
-    [labels, numClusters] = pcsegdist(cloud, 0.5);
-        
-    % Draw point clouds
-    figure(fig);
-    pcshow(cloud.Location, labels);
-    title(sprintf('Point Cloud Clusters @ %i',scenario.SimulationTime));
-    
-    % Mark vehicle location
-    plot(cuboidModel([1,0,1,1,1,0.5,0,0,0]));
-     
     closest = [];
 
-    % Get and plot cuboids5 from point clouds
-    for i = 1:numClusters
-        idx = find(labels == i);
-        model = pcfitcuboid(cloud, idx);
-        if prod(model.Dimensions) > 5
-            %plot(model)
-            % Narrow down to vehicles in specific area
-            if model.Center(1) > 0 && model.Center(2) < -0.5 && model.Center(2) > -2
-                % If it's closer than closest, use it
-                if isempty(closest)
-                    closest = model;
-                elseif model.Center(1) < closest.Center(1)
-                    closest = model;
-                end
-            end
-            %plot(model.Center)
-        end
-    end
-    %plot3(closest.Center(1), closest.Center(2), closest.Center(3));
+    [cuboids, cloud, fig] = lidarlib(ptCloud, scenario, vehicle, 'minSize', 5, 'minX', 0, 'maxY', 2, 'minY', 0.5, 'plot', 'cloud', 'callback', @onFilter);
+    
     if ~isempty(closest)
         figure(fig);
         plot(closest);
@@ -90,5 +50,15 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     s = size(detected);
     message = sprintf('Number of vehicles detected: %d\n', s(1));
     textField.String = message;
+end
+
+function [res] = onFilter(model, inertial)
+    global closest;
+    res = false;
+    if isempty(closest)
+        closest = model;
+    elseif model.Center(1) < closest.Center(1)
+        closest = model;
+    end
 end
 
