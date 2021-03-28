@@ -1,4 +1,48 @@
 function [cuboids, cloud, fig] = lidarlib(ptCloud, scenario, vehicle, varargin)
+    % LIDARLIB  Find cuboids in lidar point cloud
+    %
+    % Required Parameters 
+    %  - ptCloud: Lidar point cloud output
+    %  - scenario: The scenario variable
+    %  - vehicle: The ego vehicle
+    %
+    % Optional parameters
+    %  - minDist: Minimum distance from the ego vehicle, used to remove
+    %      vehicle from results [default: 0.05]
+    %  - minSize: Minimum size of cuboid [default: 0]
+    %  - maxSize: Maximum size of cuboid [default: 999]
+    %  - minX: Minumum x position (forward positive) [default: -999]
+    %  - maxX: Maxuimum x position (forward positive) [default: 999]
+    %  - minY: Minimum y position (right positive, opposite from plot) [default: -999]
+    %  - maxY: Maximum y position (right positive, opposite from plot) [default: 999]
+    %  - inertial: Flag to indicate if cuboids should be in inertial space
+    %      instead of vehicle space [default: false]
+    %  - plot: Plotting mode [default: ''], options are:
+    %      -> '': Do not plot
+    %      -> 'cloud': Only plot point cloud
+    %      -> 'all': Point all cuboids
+    %      -> 'filtered': Plot only cuboids meeting filter results
+    %      -> 'selected': Plot only cuboids meeting callback (same as
+    %            filtered if no callback)
+    %  - callback: Callback function to be called when other parameters met, 
+    %      needs signagure: function [res] = callback(model, inertial). [default: returns true]
+    %      -> res is result, if true cuboid will be returned.
+    %      -> model is cuboid in vehicle space
+    %      -> inertial is cuboid in interial space (using cuboid2Inertial)
+    %
+    % Returns
+    %  - cuboids: List of cuboidModels which fit filters and callback 
+    %  - cloud: Point cloud with ground and min distance removed
+    %  - fig: Figure used when plotting, empty if plot=''
+    %
+    % Example
+    %   cuboids = LIDARLIB(ptCloud, scenario, egoVehicle, 'maxSize', 100, 'minX', 0, 'minY', 0, 'maxY', 5, 'plot', 'filtered')
+    %     will return all cuboids under 100m², infront of vehicle and less
+    %     than 5m to the left. Additionally, it will plot these cuboids
+    %
+    % See also: CUBOID2INERTIAL
+
+
     plotModes = {'cloud', 'all', 'filtered', 'selected'};
     
     p = inputParser;
@@ -10,9 +54,9 @@ function [cuboids, cloud, fig] = lidarlib(ptCloud, scenario, vehicle, varargin)
     addParameter(p, 'maxX', 999);
     addParameter(p, 'minY', -999);
     addParameter(p, 'maxY', 999);
-    addParameter(p, 'callback', @defaultCallback);
     addParameter(p, 'inertial', true);
     addParameter(p, 'plot', '');
+    addParameter(p, 'callback', @defaultCallback);
     % Get input arguments
     parse(p, varargin{:});
     

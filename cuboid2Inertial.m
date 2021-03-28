@@ -1,5 +1,14 @@
 function [cuboid] = cuboid2Inertial(cuboid, egoVehicle)
-    % Derived from vehicle2Inertial
+    % CUBOID2INERTIAL  Converts cuboid from vehicle space to inertial space
+    % 
+    % Parameters
+    %  - cuboid: The cuboid to convert
+    %  - egoVehicle: The vehicle which observed the cuboid
+    % 
+    % Returns
+    %  - cuboid: The cuboid in inertial space
+    %
+    % See also: VEHICLE2INERTIAL
 
     params = cuboid.Parameters;
     positions = params(1:3).';
