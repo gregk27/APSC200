@@ -1,10 +1,10 @@
 classdef LidarLib
-%% LIDARLIB  Library for lidar processing
+% LIDARLIB  Library for lidar processing
 % Functions include cuboid detection and conversion from vehicle to
 % inertial space
 %
 %
-%% PROCESS  Find cuboids in lidar point cloud
+% PROCESS  Find cuboids in lidar point cloud
 %
 % Required Parameters 
 %  - ptCloud: Lidar point cloud output
@@ -46,7 +46,7 @@ classdef LidarLib
 %     than 5m to the left. Additionally, it will plot these cuboids
 %
 %
-%% CUBOID2INERTIAL  Converts cuboid from vehicle space to inertial space
+% CUBOID2INERTIAL  Converts cuboid from vehicle space to inertial space
 % 
 % Parameters
 %  - cuboid: The cuboid to convert
@@ -56,7 +56,8 @@ classdef LidarLib
 %  - cuboid: The cuboid in inertial space
 %
 % See also: VEHICLE2INERTIAL
-%%
+% Based on: https://www.mathworks.com/help/vision/ug/track-vehicles-using-lidar.html
+%
     methods(Static)
         function [cuboids, cloud, fig] = process(ptCloud, scenario, vehicle, varargin)
             % PROCESS  Find cuboids in lidar point cloud
@@ -116,9 +117,16 @@ classdef LidarLib
             addParameter(p, 'maxY', 999);
             addParameter(p, 'inertial', true);
             addParameter(p, 'plot', '');
+            addParameter(p, 'roi', []);
             addParameter(p, 'callback', @defaultCallback);
             % Get input arguments
             parse(p, varargin{:});
+            
+            % Apply ROI filter if desired
+            if numel(p.Results.roi) == 6
+                ptCloud = select(ptCloud, findPointsInROI(ptCloud, p.Results.roi));
+            end
+            
 
             % Filter out road surface
             [model1,inlierIndices,outlierIndices] = pcfitplane(ptCloud,1,[0,0,1],0.02);
@@ -131,8 +139,8 @@ classdef LidarLib
             % Cluster to get cuboids
             [labels, numClusters] = pcsegdist(cloud, p.Results.minDist);
 
+            
             fig = [];
-
             % Draw point clouds if enabled
             if ismember(p.Results.plot, plotModes)
                 % Initialise figure if missing
@@ -141,11 +149,20 @@ classdef LidarLib
                     fig = figure('name', 'LIDAR Result', 'Tag', 'lidar');
                 end
                 figure(fig);
-
-
+            end
+            
+            if isempty(cloud.Location)
+                cuboids = [];
+                return;
+            end
+            
+            if ~isempty(fig)
                 % Draw point cloud
                 pcshow(cloud.Location, labels);
                 title(sprintf('Point Cloud Clusters @ %i',scenario.SimulationTime));
+                xlabel('X');
+                ylabel('Y');
+                zlabel('Z');
 
                 % Mark vehicle location
                 plot(cuboidModel([1,0,1,1,1,0.5,0,0,0]));

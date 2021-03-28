@@ -3,7 +3,7 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     persistent textField;
     persistent hTopViewAxes;
     global closest;
-    if isempty(detected)
+    if isempty(textField)
         detected = [];
         [textField, hTopViewAxes] = plotScenario(scenario, vehicle);
     end
@@ -21,7 +21,9 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     
     closest = [];
 
-    [cuboids, cloud, fig] = LidarLib.process(ptCloud, scenario, vehicle, 'minSize', 5, 'minX', 0, 'maxY', 2, 'minY', 0.5, 'plot', 'cloud', 'callback', @onFilter);
+    [cuboids, cloud, fig] = LidarLib.process(ptCloud, scenario, vehicle, 'minSize', 5, 'minX', 0, 'maxY', 2, 'minY', 0.5,...
+        'plot', 'all', 'callback', @onFilter, 'roi', [-1, 15, -5, 0.5, 0, 3]);
+
     
     if ~isempty(closest)
         figure(fig);
@@ -44,7 +46,7 @@ function [] = process(scenario, objects, ptCloud, vehicle)
                 detected(rows, :) = ws.Center;
             end
         end
-    end
+   end
         
     % Update message
     s = size(detected);
