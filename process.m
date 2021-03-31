@@ -21,8 +21,8 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     
     closest = [];
 
-    [cuboids, cloud, fig] = LidarLib.process(ptCloud, scenario, vehicle, 'minSize', 5, 'minX', 0, 'maxY', -0.5, 'minY', -3,...
-        'plot', 'filtered', 'callback', @onFilter, 'roi', [-1, 20, -10, 0.5, 0, 3]);
+    [cuboids, cloud, fig] = LidarLib.process(ptCloud, scenario, vehicle, 'minSize', 5, 'maxSize', 35, 'minX', 0, 'maxX', 12.5, 'maxY', -0.5, 'minY', -3,...
+        'minRatio', 1, 'maxRatio', 3, 'plot', 'filtered', 'callback', @onFilter, 'roi', [-1, 30, -10, 0.5, 0, 5]);
 
     
     if ~isempty(closest)
