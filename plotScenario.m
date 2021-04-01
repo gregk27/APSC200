@@ -29,6 +29,11 @@ hold on
 % zlim(hTopViewAxes,[0 200])
 view(hTopViewAxes,-85,60)
 
+for i = 1 : length(scenario.Actors)
+    actor = scenario.Actors(i);
+    text(actor.Position(1), actor.Position(2), actor.Position(3)+2, actor.Name, 'HorizontalAlignment', 'center');
+end
+
 % Plot the chase view of the scenario from the rear of the vehicle.
 hChaseViewPanel = uipanel(figscenario, 'Position', [0.5 0.12 0.5 1], ...
     'Title', 'Chase View');
@@ -38,6 +43,10 @@ chasePlot(egoVehicle, 'Parent', hChaseViewAxes);
 % ylim(hChaseViewAxes,[-50 350])
 % zlim(hChaseViewAxes,[0 200])
 
+for i = 1 : length(scenario.Actors)
+    actor = scenario.Actors(i);
+    text(actor.Position(1), actor.Position(2), actor.Position(3)+2, actor.Name, 'HorizontalAlignment', 'center');
+end
 
 htextPanel = uipanel(figscenario, 'Position', [0 0 1 0.12], ...
     'Title', 'Object detection');
