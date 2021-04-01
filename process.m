@@ -2,10 +2,11 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     persistent detected;
     persistent textField;
     persistent hTopViewAxes;
+    persistent hChaseViewAxes;
     global closest;
     if isempty(textField)
         detected = [];
-        [textField, hTopViewAxes] = plotScenario(scenario, vehicle);
+        [textField, hTopViewAxes, hChaseViewAxes] = plotScenario(scenario, vehicle);
     end
 
     % objectsStruct = [objects{:}];
@@ -33,12 +34,18 @@ function [] = process(scenario, objects, ptCloud, vehicle)
             detected = [ws.Center];
             axes(hTopViewAxes);
             plot(ws);
+            
+            axes(hChaseViewAxes);
+            plot(cuboidModel([ws.Center+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
         else
-            rows = ismembertol(detected, ws.Center, 0.15, 'ByRows', true);
+            rows = ismembertol(detected, ws.Center, 0.1, 'ByRows', true);
             if ~rows
                 detected = [detected; ws.Center];
                 axes(hTopViewAxes);
                 plot(ws);
+            
+                axes(hChaseViewAxes);
+            plot(cuboidModel([ws.Center+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
             else
                 disp(detected);
                 disp(rows);

@@ -1,4 +1,4 @@
-function [textField, hTopViewAxes] = plotScenario(scenario,egoVehicle)
+function [textField, hTopViewAxes, hChaseViewAxes] = plotScenario(scenario,egoVehicle)
 % Helper function for APSC 200 project.
 % This function creates the visalization interface
 % Input: scenario, egoVehicle
