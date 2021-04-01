@@ -4,19 +4,12 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     persistent hTopViewAxes;
     persistent hChaseViewAxes;
     global closest;
+    global plates;
     if isempty(textField)
         detected = [];
+        plates = [];
         [textField, hTopViewAxes, hChaseViewAxes] = plotScenario(scenario, vehicle);
     end
-
-    % objectsStruct = [objects{:}];
-    
-     %if ~isempty(objects)
-     %        allPosInertial = vehicle2Inertial(objects, vehicle);
-     %        disp('Class ids: %i\n');
-     %        disp([objectsStruct.ObjectClassID]);
-
-     %end
 
     % plot3(allPosInertial(1,:), allPosInertial(2,:), allPosInertial(3,:), 'b. ', 'Parent', hTopViewAxes);
     
@@ -53,11 +46,30 @@ function [] = process(scenario, objects, ptCloud, vehicle)
                 detected(rows, :) = ws.Center;
             end
         end
+        
+        objectsStruct = [objects{:}];
+    
+        % Check for camera detections
+        if ~isempty(objectsStruct)
+            for i = 1 : length(objectsStruct)
+                o = objectsStruct(i);
+                dx = closest.Center(1) - o.Measurement(1);
+                dy = closest.Center(2) - o.Measurement(2);
+                % If the camera point is within the vehicle's radius
+                if(dx^2+dy^2 <= (closest.Dimensions(1)*1.15)^2)
+                    actor = scenario.Actors(o.ObjectAttributes{1,1}.TargetIndex);
+                    if ~any(strcmp(plates, actor.Name))
+                        plates = [plates actor.Name];
+                        disp(plates);
+                    end
+                end
+            end
+        end
    end
         
     % Update message
     s = size(detected);
-    message = sprintf('Number of vehicles detected: %d\n', s(1));
+    message = sprintf('Number of vehicles detected: %d\nPlates detected: %s', s(1), join(["" plates], ","));
     textField.String = message;
 end
 
