@@ -1,1 +1,43 @@
-<h1>Hello world!</h1>
+<script>
+    window.onload = function() {
+
+        setInterval(() => {
+            console.log("Interval")
+            fetch('http://localhost:3000/data').then(function (response) {
+                return response.text();
+            })
+            .then(function(text) {
+                html = "<tr><th>X</th><th>Y</th><th>Plate</th><th>Time</th></tr>";
+                res = JSON.parse(text);
+                console.log(res);
+                for(let car of res){
+                    html += `<tr><td>${car.x}</td><td>${car.y}</td><td class='plate'>${car.plate}</td><td>${car.time}</td></tr>`;
+                }
+                document.getElementById('table').innerHTML = html;
+            })
+        }, 500);
+        
+    }
+
+</script>
+<style>
+    table {
+        border-collapse: collapse;
+    }
+    td {
+        border-top: 1px solid black;
+        text-align: right;
+        padding-left:0.5em;
+        padding-right:0.5em;
+    }
+    td.plate {
+        text-align: center;
+    }
+    th {
+        border-bottom: 2px solid grey;
+    }
+</style>
+<table id="table">
+    
+
+</table>
