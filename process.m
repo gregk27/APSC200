@@ -18,7 +18,6 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     [cuboids, cloud, fig] = LidarLib.process(ptCloud, scenario, vehicle, 'minSize', 5, 'maxSize', 35, 'minX', 0, 'maxX', 12.5, 'maxY', -0.5, 'minY', -3,...
         'minRatio', 1, 'maxRatio', 3, 'plot', 'filtered', 'callback', @onFilter, 'roi', [-1, 30, -10, 0.5, 0, 5]);
 
-    
     if ~isempty(closest)
         figure(fig);
         plot(closest);
@@ -56,7 +55,7 @@ function [] = process(scenario, objects, ptCloud, vehicle)
                 dx = closest.Center(1) - o.Measurement(1);
                 dy = closest.Center(2) - o.Measurement(2);
                 % If the camera point is within the vehicle's radius
-                if(dx^2+dy^2 <= (closest.Dimensions(1)*1.15)^2)
+                if(dx^2+dy^2 <= ((closest.Dimensions(1)/2)^2)*1.15)
                     actor = scenario.Actors(o.ObjectAttributes{1,1}.TargetIndex);
                     if ~any(strcmp(plates, actor.Name))
                         plates = [plates actor.Name];
