@@ -2,3 +2,4 @@
 *.asv
 *.p
 dbconn.m
+node_modules
