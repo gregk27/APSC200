@@ -3,3 +3,4 @@
 *.p
 dbconn.m
 node_modules
+dbcfg.json
