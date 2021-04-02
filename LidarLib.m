@@ -128,6 +128,8 @@ classdef LidarLib
             addParameter(p, 'maxX', 999);
             addParameter(p, 'minY', -999);
             addParameter(p, 'maxY', 999);
+            addParameter(p, 'minRatio', 0);
+            addParameter(p, 'maxRatio', 999);
             addParameter(p, 'inertial', true);
             addParameter(p, 'plot', '');
             addParameter(p, 'roi', []);
@@ -192,8 +194,11 @@ classdef LidarLib
                     plot(model);
                 end
                 if prod(model.Dimensions) > p.Results.minSize && prod(model.Dimensions) < p.Results.maxSize
+                    ratio = model.Dimensions(1)/model.Dimensions(2);
                     % Narrow down to vehicles in specific area
-                    if model.Center(1) > p.Results.minX && model.Center(1) < p.Results.maxX && model.Center(2) < p.Results.maxY && model.Center(2) > p.Results.minY
+                    if model.Center(1) > p.Results.minX && model.Center(1) < p.Results.maxX && ...
+                            model.Center(2) < p.Results.maxY && model.Center(2) > p.Results.minY && ...
+                            ratio > p.Results.minRatio && ratio < p.Results.maxRatio
                         if strcmp(p.Results.plot, 'filtered')
                             figure(fig);
                             plot(model);

@@ -2,10 +2,11 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     persistent detected;
     persistent textField;
     persistent hTopViewAxes;
+    persistent hChaseViewAxes;
     global closest;
     if isempty(textField)
         detected = [];
-        [textField, hTopViewAxes] = plotScenario(scenario, vehicle);
+        [textField, hTopViewAxes, hChaseViewAxes] = plotScenario(scenario, vehicle);
     end
 
     % objectsStruct = [objects{:}];
@@ -21,8 +22,8 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     
     closest = [];
 
-    [cuboids, cloud, fig] = LidarLib.process(ptCloud, scenario, vehicle, 'minSize', 5, 'minX', 0, 'maxY', -0.5, 'minY', -2,...
-        'plot', 'cloud', 'callback', @onFilter, 'roi', [-1, 15, -5, 0.5, 0, 3]);
+    [cuboids, cloud, fig] = LidarLib.process(ptCloud, scenario, vehicle, 'minSize', 5, 'maxSize', 35, 'minX', 0, 'maxX', 12.5, 'maxY', -0.5, 'minY', -3,...
+        'minRatio', 1, 'maxRatio', 3, 'plot', 'filtered', 'callback', @onFilter, 'roi', [-1, 30, -10, 0.5, 0, 5]);
 
     
     if ~isempty(closest)
@@ -33,12 +34,18 @@ function [] = process(scenario, objects, ptCloud, vehicle)
             detected = [ws.Center];
             axes(hTopViewAxes);
             plot(ws);
+            
+            axes(hChaseViewAxes);
+            plot(cuboidModel([ws.Center+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
         else
-            rows = ismembertol(detected, ws.Center, 0.15, 'ByRows', true);
+            rows = ismembertol(detected, ws.Center, 0.1, 'ByRows', true);
             if ~rows
                 detected = [detected; ws.Center];
                 axes(hTopViewAxes);
                 plot(ws);
+            
+                axes(hChaseViewAxes);
+            plot(cuboidModel([ws.Center+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
             else
                 disp(detected);
                 disp(rows);
