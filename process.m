@@ -3,12 +3,16 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     persistent textField;
     persistent hTopViewAxes;
     persistent hChaseViewAxes;
+    persistent conn;
     global closest;
     global plates;
     if isempty(textField)
         detected = [];
         plates = [];
         [textField, hTopViewAxes, hChaseViewAxes] = plotScenario(scenario, vehicle);
+    end
+    if isempty(conn)
+        conn = dbconn();
     end
 
     % plot3(allPosInertial(1,:), allPosInertial(2,:), allPosInertial(3,:), 'b. ', 'Parent', hTopViewAxes);
@@ -60,6 +64,10 @@ function [] = process(scenario, objects, ptCloud, vehicle)
                     if ~any(strcmp(plates, actor.Name))
                         plates = [plates actor.Name];
                         disp(plates);
+                        
+                        ws = LidarLib.cuboid2Inertial(closest, vehicle);
+                        data = table(ws.Center(1),ws.Center(2),actor.Name,'VariableNames', {'x', 'y', 'plate'});
+                        sqlwrite(conn, 'vehicles', data);
                     end
                 end
             end
