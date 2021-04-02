@@ -124,6 +124,8 @@ classdef LidarLib
             addParameter(p, 'minDist', 0.5);
             addParameter(p, 'minSize', 0);
             addParameter(p, 'maxSize', 999);
+            addParameter(p, 'minYaw', -999);
+            addParameter(p, 'maxYaw', 999);
             addParameter(p, 'minX', -999);
             addParameter(p, 'maxX', 999);
             addParameter(p, 'minY', -999);
@@ -198,7 +200,8 @@ classdef LidarLib
                     % Narrow down to vehicles in specific area
                     if model.Center(1) > p.Results.minX && model.Center(1) < p.Results.maxX && ...
                             model.Center(2) < p.Results.maxY && model.Center(2) > p.Results.minY && ...
-                            ratio > p.Results.minRatio && ratio < p.Results.maxRatio
+                            ratio > p.Results.minRatio && ratio < p.Results.maxRatio && ...
+                            model.Orientation(3) < p.Results.maxYaw && model.Orientation(3) > p.Results.minYaw
                         if strcmp(p.Results.plot, 'filtered')
                             figure(fig);
                             plot(model);
