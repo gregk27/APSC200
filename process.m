@@ -1,4 +1,4 @@
-function [] = process(scenario, objects, ptCloud, vehicle)
+function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
     persistent detected;
     persistent textField;
     persistent hTopViewAxes;
@@ -15,7 +15,7 @@ function [] = process(scenario, objects, ptCloud, vehicle)
         [textField, hTopViewAxes, hChaseViewAxes] = plotScenario(scenario, vehicle);
                 
         % Mark areas that are ticketable 
-        areas = select(conn, "SELECT x0,y0,x1,y1 FROM areas");
+        areas = select(conn, "SELECT x0,y0,x1,y1 FROM areas where scenario='"+scenarioName+"'");
         areaCount = size(areas);
         areaCount = areaCount(1);
                 
@@ -42,7 +42,7 @@ function [] = process(scenario, objects, ptCloud, vehicle)
     
     if ~isempty(closest)
         % Get the areas that are ticketable 
-        areas = select(conn, "SELECT x0,y0,x1,y1 FROM areas");
+        areas = select(conn, "SELECT x0,y0,x1,y1 FROM areas where scenario='"+scenarioName+"'");
         areaCount = size(areas);
         areaCount = areaCount(1);
         

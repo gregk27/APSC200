@@ -77,7 +77,7 @@ while running
     
         
     if any(isValidTime) || any(isValidLaneTime) || any(isValidPointCloudTime)
-        process(scenario, objectDetections, ptCloud, egoVehicle)
+        process(scenario, objectDetections, ptCloud, egoVehicle, 'test2')
     end
     
     

@@ -41,7 +41,7 @@ while running
             'ObjectDetections', {objectDetections}, ...
             'LaneDetections', {laneDetections}, ...
             'PointClouds',   {ptClouds}); %#ok<AGROW>
-        process(scenario, objectDetections, ptClouds, egoVehicle);
+        process(scenario, objectDetections, ptClouds, egoVehicle, 'nick');
     end
     
     % Advance the scenario one time step and exit the loop if the scenario is complete
