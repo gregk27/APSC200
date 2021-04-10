@@ -195,9 +195,10 @@ classdef LidarLib
                     figure(fig);
                     plot(model);
                 end
+                % Filter by size and ratio
                 if prod(model.Dimensions) > p.Results.minSize && prod(model.Dimensions) < p.Results.maxSize
                     ratio = model.Dimensions(1)/model.Dimensions(2);
-                    % Narrow down to vehicles in specific area
+                    % Filter by area
                     if model.Center(1) > p.Results.minX && model.Center(1) < p.Results.maxX && ...
                             model.Center(2) < p.Results.maxY && model.Center(2) > p.Results.minY && ...
                             ratio > p.Results.minRatio && ratio < p.Results.maxRatio && ...
@@ -206,13 +207,16 @@ classdef LidarLib
                             figure(fig);
                             plot(model);
                         end
+                        % Get interial space representation
                         inertial = LidarLib.cuboid2Inertial(model, vehicle);
+                        % Filter by callback function
                         res = p.Results.callback(model, inertial);
                         if res
                             if strcmp(p.Results.plot, 'selected')
                                 figure(fig);
                                 plot(model);
                             end
+                            % Add to returned data
                             cuboids = [cuboids, inertial];
                         end
                     end
