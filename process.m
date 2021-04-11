@@ -44,22 +44,24 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
     [cuboids, cloud, fig] = LidarLib.process(ptCloud, scenario, vehicle, 'minSize', 5, 'maxSize', 35, 'minX', 0, 'maxX', 12.5, 'maxY', -0.5, 'minY', -3,...
         'minYaw', -60, 'maxYaw', 60, 'minRatio', 1, 'maxRatio', 3, 'plot', 'filtered', 'callback', @onFilter, 'roi', [-1, 30, -10, 0.5, 0, 5]);
     
-    inZone = false;
+    inZone = false  ;
     
     if ~isempty(closest)
         % Get the areas that are ticketable 
         areas = select(conn, "SELECT x0,y0,x1,y1 FROM areas where scenario='"+scenarioName+"'");
         areaCount = size(areas);
         areaCount = areaCount(1);
-        
+
         % Get vehicle position in interial (world) space
         pos = LidarLib.cuboid2Inertial(closest, vehicle).Center;
-        
+
         for rowIdx = 1:areaCount
+            % Get values from table
             x0 = double(areas{rowIdx, 1});
             y0 = double(areas{rowIdx, 2});
             x1 = double(areas{rowIdx, 3});
             y1 = double(areas{rowIdx, 4});
+            % Check if the vehicle position is in the area
             if inpolygon(pos(1), pos(2), [x0, x1, x1, x0], [y0, y0, y1, y1])
                 inZone = true;
                 break;

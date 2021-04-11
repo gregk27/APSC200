@@ -15,6 +15,8 @@ function [allData, scenario, sensors] = City()
 % Create all the sensors
 [sensors, numSensors] = createSensors(scenario);
 
+scenario.StopTime = 200;
+
 allData = struct('Time', {}, 'ActorPoses', {}, 'ObjectDetections', {}, 'LaneDetections', {}, 'PointClouds', {});
 running = true;
 while running
