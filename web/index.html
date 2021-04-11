@@ -3,7 +3,8 @@
 
         setInterval(() => {
             console.log("Interval")
-            fetch('http://localhost:3000/data').then(function (response) {
+            // Get detected vehicle info
+            fetch('http://localhost:3000/data/vehicles').then(function (response) {
                 return response.text();
             })
             .then(function(text) {
@@ -11,9 +12,35 @@
                 res = JSON.parse(text);
                 console.log(res);
                 for(let car of res){
-                    html += `<tr><td>${car.x}</td><td>${car.y}</td><td class='plate'>${car.plate}</td><td>${car.time}</td></tr>`;
+                    html += `<tr class="${car.plate==null ? "noPlate" : ""}"><td>${car.x}</td><td>${car.y}</td><td class='plate'>${car.plate}</td><td>${car.time}</td></tr>`;
                 }
-                document.getElementById('table').innerHTML = html;
+                document.getElementById('vehicles').innerHTML = html;
+            })
+            // Get illegal area info
+            fetch('http://localhost:3000/data/areas/city').then(function (response) {
+                return response.text();
+            })
+            .then(function(text) {
+                html = "<tr><th>Name</th><th>X<sub>0</sub></th><th>Y<sub>0</sub></th><th>X<sub>1</sub></th><th>Y<sub>1</sub></th></tr>";
+                res = JSON.parse(text);
+                console.log(res);
+                for(let area of res){
+                    html += `<tr><td class="name">${area.name}</td><td>${area.x0}</td><td>${area.y0}</td><td>${area.x1}</td><td>${area.y1}</td></tr>`;
+                }
+                document.getElementById('areas').innerHTML = html;
+            })            
+            // Get exempt plates info
+            fetch('http://localhost:3000/data/exempt').then(function (response) {
+                return response.text();
+            })
+            .then(function(text) {
+                html = "<tr><th>Licence Plate</th></tr>";
+                res = JSON.parse(text);
+                console.log(res);
+                for(let ex of res){
+                    html += `<tr><td class="plate">${ex.plate}</td></tr>`;
+                }
+                document.getElementById('exempt').innerHTML = html;
             })
         }, 500);
         
@@ -21,6 +48,17 @@
 
 </script>
 <style>
+    body{
+        font-family: Arial, Helvetica, sans-serif;
+    }
+    #container {
+        display: grid;
+        grid-template-columns: 60% auto;
+        grid-template-rows: auto;
+        grid-template-areas: "vehicles areas" 
+                             "vehicles exempt"  
+                             "vehicles .";
+    }
     table {
         border-collapse: collapse;
     }
@@ -30,14 +68,39 @@
         padding-left:0.5em;
         padding-right:0.5em;
     }
+    tr.noPlate td.plate {
+        background-color: rgb(126, 27, 142);
+        color:white;
+    }
     td.plate {
         text-align: center;
+    }
+    td.name {
+        text-align: left;
     }
     th {
         border-bottom: 2px solid grey;
     }
 </style>
-<table id="table">
-    
 
-</table>
+<div id="container">
+    <div style="grid-area: vehicles;">
+        <h1>Detected Vehicles</h1>
+        <table id="vehicles">
+            
+            
+        </table>
+    </div>
+    <div style="grid-area: areas;">
+        <h2>Illegal Areas</h2>
+        <table id="areas">
+            
+        </table>
+    </div>
+    <div style="grid-area: exempt;">
+        <h2>Exempt Plates</h2>
+        <table id="exempt">
+            
+        </table>
+    </div>
+</div>
