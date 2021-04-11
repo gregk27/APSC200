@@ -107,15 +107,17 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
                 % If the camera point is within the vehicle's radius
                 if(dx^2+dy^2 <= ((closest.Dimensions(1)/2)^2)*1.15)
                     % Get plate number (actor name)
-                    actor = scenario.Actors(o.ObjectAttributes{1,1}.TargetIndex);
-                    % If the plate hasn't been seen before, add it to array and database
-                    if ~any(strcmp(plates, actor.Name))
-                        plates = [plates actor.Name];
+                    plate = scenario.Actors(o.ObjectAttributes{1,1}.TargetIndex).Name;
+                    % Get list of exemptions
+                    exempt = select(conn, "SELECT plate FROM exemptions");        
+                    % If the plate hasn't been seen before and isn't exempt, add it to array and database
+                    if ~any(strcmp(plates, plate)) && ~any(strcmp(exempt.Variables, plate))
+                        plates = [plates plate];
                         disp(plates);
                         
                         % Prepare and upload to database
                         ws = LidarLib.cuboid2Inertial(closest, vehicle);
-                        data = table(ws.Center(1),ws.Center(2),actor.Name,'VariableNames', {'x', 'y', 'plate'});
+                        data = table(ws.Center(1),ws.Center(2),plate,'VariableNames', {'x', 'y', 'plate'});
                         sqlwrite(conn, 'vehicles', data);
                     end
                 end

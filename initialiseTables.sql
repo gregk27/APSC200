@@ -15,6 +15,11 @@ create table areas (
     x1 int not null, 
     y1 int not null);
 
+-- Create exemptions table
+create table exemptions (
+    id int key auto_increment
+    plate varchar(16) not null);
+
 -- Populate areas
 insert into areas
             (scenario, name, x0, y0, x1, y1)
@@ -23,3 +28,9 @@ insert into areas
             ('city', 'Mid St',     25,  15,  15, -15),
             ('city', 'Bottom St',  -5,  15, -15, -15),
             ('test', 'test',       50,  50, -50, -50),
+
+-- Populate exemptions
+insert into exemptions
+            (plate)
+    values  ('657 UPRT'),
+            ('QIQP 063')
