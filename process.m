@@ -82,14 +82,13 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
             axes(hChaseViewAxes);
         else
             % Get logical matrix from positions based on tolerance
-            rows = ismembertol(detected, ws.Center, 0.12, 'ByRows', true);
+            rows = ismembertol(detected, ws.Center, 0.115, 'ByRows', true);
             if ~rows
                 % If no existing detections are within tolerance, add it
                 detected = [detected; ws.Center];
                 axes(hTopViewAxes);
                 plot(ws);
             
-                axes(hChaseViewAxes);
             else
                 % If an existing detection is within tolerance, update it
                 disp(detected);
@@ -162,9 +161,10 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
         end
 
         % If the last detection isn't counted and isn't exempt, count and mark it
-        if (isempty(counted) || ~ismembertol(lastDet, counted, 0.12, 'ByRows', true)) && ...
-                (isempty(exemptPos) || ~ismembertol(lastDet, exemptPos, 0.12, 'ByRows', true))
+        if (isempty(counted) || ~ismembertol(lastDet, counted, 0.14, 'ByRows', true)) && ...
+                (isempty(exemptPos) || ~ismembertol(lastDet, exemptPos, 0.14, 'ByRows', true))
             counted = [counted; lastDet];
+            axes(hChaseViewAxes);
             plot(cuboidModel([lastDet+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
 
             % Upload to database without plate

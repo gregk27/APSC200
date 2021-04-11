@@ -45,7 +45,11 @@ chasePlot(egoVehicle, 'Parent', hChaseViewAxes);
 
 for i = 1 : length(scenario.Actors)
     actor = scenario.Actors(i);
-    text(actor.Position(1), actor.Position(2), actor.Position(3)+2, actor.Name, 'HorizontalAlignment', 'center');
+    if strcmp(actor.Name, "")
+        text(actor.Position(1), actor.Position(2), actor.Position(3)+2, "♦♦♦", 'HorizontalAlignment', 'center');
+    else
+        text(actor.Position(1), actor.Position(2), actor.Position(3)+2, actor.Name, 'HorizontalAlignment', 'center');
+    end
 end
 
 htextPanel = uipanel(figscenario, 'Position', [0 0 1 0.12], ...

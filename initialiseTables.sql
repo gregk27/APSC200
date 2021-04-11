@@ -33,4 +33,5 @@ insert into areas
 insert into exemptions
             (plate)
     values  ('657 UPRT'),
-            ('QIQP 063')
+            ('QIQP 063'),
+            ('800 UPYO')
