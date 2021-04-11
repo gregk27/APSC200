@@ -5,13 +5,19 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
     persistent hChaseViewAxes;
     persistent conn;
     global closest;
-    global plates;
+    persistent plates;
+    persistent counted;
+    persistent exemptPlates;
+    persistent exemptPos;
     if isempty(conn)
         conn = dbconn();
     end
     if isempty(textField)
         detected = [];
         plates = [];
+        counted = [];
+        exemptPlates = [];
+        exemptPos = [];
         [textField, hTopViewAxes, hChaseViewAxes] = plotScenario(scenario, vehicle);
                 
         % Mark areas that are ticketable 
@@ -74,7 +80,6 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
             plot(ws);
             
             axes(hChaseViewAxes);
-            plot(cuboidModel([ws.Center+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
         else
             % Get logical matrix from positions based on tolerance
             rows = ismembertol(detected, ws.Center, 0.12, 'ByRows', true);
@@ -85,7 +90,6 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
                 plot(ws);
             
                 axes(hChaseViewAxes);
-            plot(cuboidModel([ws.Center+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
             else
                 % If an existing detection is within tolerance, update it
                 disp(detected);
@@ -108,28 +112,74 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
                 if(dx^2+dy^2 <= ((closest.Dimensions(1)/2)^2)*1.15)
                     % Get plate number (actor name)
                     plate = scenario.Actors(o.ObjectAttributes{1,1}.TargetIndex).Name;
+                    % POC CASE: IF THE NAME IS EMPTY, ASSUME PLATE CANNOT BE READ
+                    if strcmp(plate, "")
+                        break;
+                    end
                     % Get list of exemptions
-                    exempt = select(conn, "SELECT plate FROM exemptions");        
-                    % If the plate hasn't been seen before and isn't exempt, add it to array and database
-                    if ~any(strcmp(plates, plate)) && ~any(strcmp(exempt.Variables, plate))
-                        plates = [plates plate];
-                        disp(plates);
-                        
-                        % Prepare and upload to database
-                        ws = LidarLib.cuboid2Inertial(closest, vehicle);
-                        data = table(ws.Center(1),ws.Center(2),plate,'VariableNames', {'x', 'y', 'plate'});
-                        sqlwrite(conn, 'vehicles', data);
+                    exempt = select(conn, "SELECT plate FROM exemptions");   
+                    
+                    % Check if the plate is exempt
+                    if ~any(strcmp(exempt.Variables, plate))
+                        % If it isn't, then record it if new
+                        if ~any(strcmp(plates, plate))
+                            plates = [plates plate];
+                            disp(plates);
+
+                            % Prepare and upload to database
+                            ws = LidarLib.cuboid2Inertial(closest, vehicle);
+                            data = table(ws.Center(1),ws.Center(2),plate,'VariableNames', {'x', 'y', 'plate'});
+                            sqlwrite(conn, 'vehicles', data);
+                            
+                            % Count vehicle and draw detection marker
+                            counted = [counted; ws.Center];
+                            axes(hChaseViewAxes);
+                            plot(cuboidModel([ws.Center+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
+                        end
+                    else
+                        % If it is, list the vehicle as exempt if new
+                        if ~any(strcmp(exemptPlates, plate))
+                            % Save the plate to exempt list
+                            exemptPlates = [exemptPlates plate];
+                            
+                            % Save the vehicle position to exempt list
+                            ws = LidarLib.cuboid2Inertial(closest, vehicle);
+                            exemptPos = [exemptPos; ws.Center];
+                        end
                     end
                 end
             end
         end
-   end
+    end
+   
+    % If there are 2 vehicles in deteced, check if previous plate was read
+    if sum(size(detected))-3 > 1
+        % Get the last detected vehicle (if closest has a value then that will be previous)
+        if isempty(closest)
+            lastDet = detected(end, :);
+        else
+            lastDet = detected(end-1, :);
+        end
+
+        % If the last detection isn't counted and isn't exempt, count and mark it
+        if (isempty(counted) || ~ismembertol(lastDet, counted, 0.12, 'ByRows', true)) && ...
+                (isempty(exemptPos) || ~ismembertol(lastDet, exemptPos, 0.12, 'ByRows', true))
+            counted = [counted; lastDet];
+            plot(cuboidModel([lastDet+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
+
+            % Upload to database without plate
+            data = table(lastDet(1),lastDet(2),'VariableNames', {'x', 'y'});
+            sqlwrite(conn, 'vehicles', data);
+        end
+    end
+    
         
     % Update message
-    s = size(detected);
+    s = size(counted);
     message = sprintf('Number of vehicles detected: %d\nPlates detected: %s', s(1), join(["" plates], ","));
     textField.String = message;
 end
+
 
 function [res] = onFilter(model, inertial)
     global closest;
