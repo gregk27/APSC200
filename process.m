@@ -9,6 +9,8 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
     persistent counted;
     persistent exemptPlates;
     persistent exemptPos;
+    persistent images;
+    persistent flowFig;
     if isempty(conn)
         conn = dbconn();
     end
@@ -35,6 +37,23 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
             axes(hChaseViewAxes);
             plot(cuboidModel([x0-abs(x1-x0)/2, y0-abs(y1-y0)/2, -0.5, abs(x1-x0), abs(y1-y0), 0.9, 0, 0, 0]));
         end  
+        images = cell(0);
+        images = [images imread("flowchart/1.png")];
+        images = [images imread("flowchart/2.png")];
+        images = [images imread("flowchart/3.png")];
+        images = [images imread("flowchart/4.png")];
+        images = [images imread("flowchart/5.png")];
+        images = [images imread("flowchart/6.png")];
+        images = [images imread("flowchart/7.png")];
+        images = [images imread("flowchart/full.png")];
+        
+        % Initialise figure if missing
+        flowFig = findall(0, 'Type', 'Figure', 'Tag', 'flowchart');
+        if isempty(flowFig)
+            flowFig = figure('name', 'Flowchart', 'Tag', 'flowchart');
+        end
+        figure(flowFig);
+        imshow(images{1}, 'Border','tight');
     end
 
     % plot3(allPosInertial(1,:), allPosInertial(2,:), allPosInertial(3,:), 'b. ', 'Parent', hTopViewAxes);
@@ -67,7 +86,7 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
                 break;
             end
         end    
-    end
+    end `7765PP-==9OO8I
         
     if ~isempty(closest) && inZone
         figure(fig);
@@ -81,7 +100,8 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
             axes(hTopViewAxes);
             plot(ws);
             
-            axes(hChaseViewAxes);
+            figure(flowFig);
+            imshow(images{1}, 'Border','tight');
         else
             % Get logical matrix from positions based on tolerance
             rows = ismembertol(detected, ws.Center, 0.115, 'ByRows', true);
@@ -90,20 +110,30 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
                 detected = [detected; ws.Center];
                 axes(hTopViewAxes);
                 plot(ws);
-            
+
+                figure(flowFig);
+                imshow(images{1}, 'Border','tight');
             else
                 % If an existing detection is within tolerance, update it
                 disp(detected);
                 disp(rows);
                 disp(detected(rows, :));
                 detected(rows, :) = ws.Center;
+                figure(flowFig);
+                if (isempty(counted) || ~ismembertol(ws.Center, counted, 0.14, 'ByRows', true)) && ...
+                (isempty(exemptPos) || ~ismembertol(ws.Center, exemptPos, 0.14, 'ByRows', true))
+                    imshow(images{3}, 'Border','tight');
+                end
             end
         end
         
         objectsStruct = [objects{:}];
     
         % Check for camera detections
-        if ~isempty(objectsStruct)
+        if ~isempty(objectsStruct) && (isempty(counted) || ~ismembertol(ws.Center, counted, 0.12, 'ByRows', true)) && ...
+                (isempty(exemptPos) || ~ismembertol(ws.Center, exemptPos, 0.12, 'ByRows', true))
+            figure(flowFig);
+            imshow(images{2}, 'Border','tight');
             for i = 1 : length(objectsStruct)
                 % Get detection location relative to closest vehicle
                 o = objectsStruct(i);
@@ -124,6 +154,12 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
                     if ~any(strcmp(exempt.Variables, plate))
                         % If it isn't, then record it if new
                         if ~any(strcmp(plates, plate))
+                            figure(flowFig);
+                            imshow(images{4}, 'Border','tight');
+                            drawnow;
+                            imshow(images{5}, 'Border','tight');
+                            drawnow;
+                            imshow(images{1}, 'Border','tight');
                             plates = [plates plate];
                             disp(plates);
 
@@ -140,6 +176,10 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
                     else
                         % If it is, list the vehicle as exempt if new
                         if ~any(strcmp(exemptPlates, plate))
+                            figure(flowFig);
+                            imshow(images{4}, 'Border','tight');
+                            drawnow;
+                            imshow(images{7}, 'Border','tight');
                             % Save the plate to exempt list
                             exemptPlates = [exemptPlates plate];
                             
@@ -150,6 +190,9 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
                     end
                 end
             end
+        else
+            figure(flowFig);
+            imshow(images{1}, 'Border','tight');
         end
     end
    
@@ -165,6 +208,10 @@ function [] = process(scenario, objects, ptCloud, vehicle, scenarioName)
         % If the last detection isn't counted and isn't exempt, count and mark it
         if (isempty(counted) || ~ismembertol(lastDet, counted, 0.14, 'ByRows', true)) && ...
                 (isempty(exemptPos) || ~ismembertol(lastDet, exemptPos, 0.14, 'ByRows', true))
+            figure(flowFig);
+            imshow(images{6}, 'Border','tight');
+            drawnow;
+            imshow(images{1}, 'Border','tight');
             counted = [counted; lastDet];
             axes(hChaseViewAxes);
             plot(cuboidModel([lastDet+[0,0,2], 0.2, 0.2, 1, 0, 0, 0]));
